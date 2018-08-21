@@ -19,7 +19,10 @@ long fileSize(FILE* fp)
     return sz;
 
 }
+
 void Client(const char* filename, const char* ifaceOrIp, const char* port){
+
+    Services::UDPClient client;
 
     std::string directory_path{TESTFILES_DIR};
     const auto chunkbit     = 10;
@@ -48,16 +51,22 @@ void Client(const char* filename, const char* ifaceOrIp, const char* port){
     std::fclose(pFile);
 
 }
-void Server(const char* ifaceName = "bridge100", const char* port = "4567"){
-    Services::UDPServer server("4567", "bridge100");
+std::thread Server(const char* ifaceName, const char* port){
+
+    Services::UDPServer server(port, ifaceName);
+    return std::thread([&](){
+        server.RunService();
+    });
+
 }
+
 int main (int argc, char ** argv){
 
 	//1. open an UDP socket server. Thread it.
 	//2. open a client socket server. 
-	//
 	//3. Send Data.
 	//4. MD5 it
+
 	//UDPServer udpServer(0x3f78);
 
 
@@ -65,10 +74,10 @@ int main (int argc, char ** argv){
 		udpServer.RunService();
 	});
     */
-	Services::UDPClient client;
 
-
-    std::thread tServer(Server);
+	auto tServer = Server(argv[1], argv[2]);
+	Client(argv[3], argv[1], argv[2]);
+    tServer.join();
 
 
 
